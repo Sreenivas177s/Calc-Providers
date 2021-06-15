@@ -4,7 +4,6 @@ import 'package:calculatorbutcomplex/menu.dart';
 import 'package:calculatorbutcomplex/routing/routing_constants.dart';
 import 'package:flutter/material.dart';
 
-import '../calc1.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   Calculation calc = new Calculation();
