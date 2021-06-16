@@ -44,7 +44,7 @@ class Calculator extends StatelessWidget {
 
     ElevatedButton numberpads(String numm) {
       return ElevatedButton(
-        onPressed: () {
+        onPressed: () async {
           box_1 += numm;
           screen += numm;
           var cart = context.read<Calculation>();
@@ -53,7 +53,7 @@ class Calculator extends StatelessWidget {
           if (op != "") {
             num2 = box_1;
             
-            cart.ezcalculation();
+            await cart.ezcalculation();
             cart.setScreen(screen);
           }
         },
@@ -110,13 +110,13 @@ class Calculator extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   var cart = context.read<Calculation>();
                   if (screen!="") {
   screen = screen.substring(0, screen.length - 1);
 }
                   cart.setScreen(screen);
-                  cart.ezcalculation();
+                  await cart.ezcalculation();
                 },
                 child: Icon(Icons.keyboard_backspace),
               ),
@@ -136,11 +136,11 @@ class Calculator extends StatelessWidget {
                 child: Text("RESET"),
               ),
               ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     var cart = context.read<Calculation>();
                     screen += cart.getValue();
                     cart.setScreen(screen);
-                    cart.ezcalculation();
+                    await cart.ezcalculation();
                     cart.setScreen(screen);
                   },
                   child: Text("ANS")),
