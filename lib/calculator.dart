@@ -32,7 +32,7 @@ class Calculator extends StatelessWidget {
         onPressed: () {
           if (num1 == "") num1 = box_1;
           box_1 = "";
-          screen += "$opp";
+          screen += " $opp ";
           op = opp;
           var cart = context.read<Calculation>();
           cart.setScreen(screen);
@@ -44,22 +44,16 @@ class Calculator extends StatelessWidget {
 
     ElevatedButton numberpads(String numm) {
       return ElevatedButton(
-        onPressed: () async {
-          var cart = context.read<Calculation>();
-          // if  (screen[0] == "+" ||
-          // screen[0] == "-" ||
-          // screen[0] == "*" ||
-          // screen[0] == "/") {
-          //   screen = "$cart.getValue()" + "$screen";
-          // }
+        onPressed: () {
           box_1 += numm;
           screen += numm;
-
+          var cart = context.read<Calculation>();
           print("screen - $screen");
           cart.setScreen(screen);
           if (op != "") {
             num2 = box_1;
-            await cart.ezcalculation();
+            
+            cart.ezcalculation();
             cart.setScreen(screen);
           }
         },
@@ -116,13 +110,13 @@ class Calculator extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ElevatedButton(
-                onPressed: () async {
+                onPressed: () {
                   var cart = context.read<Calculation>();
-                  if (screen != "") {
-                    screen = screen.substring(0, screen.length - 1);
-                    cart.setScreen(screen);
-                    await cart.ezcalculation();
-                  }
+                  if (screen!="") {
+  screen = screen.substring(0, screen.length - 1);
+}
+                  cart.setScreen(screen);
+                  cart.ezcalculation();
                 },
                 child: Icon(Icons.keyboard_backspace),
               ),
@@ -142,11 +136,11 @@ class Calculator extends StatelessWidget {
                 child: Text("RESET"),
               ),
               ElevatedButton(
-                  onPressed: () async {
+                  onPressed: () {
                     var cart = context.read<Calculation>();
                     screen += cart.getValue();
                     cart.setScreen(screen);
-                    await cart.ezcalculation();
+                    cart.ezcalculation();
                     cart.setScreen(screen);
                   },
                   child: Text("ANS")),
