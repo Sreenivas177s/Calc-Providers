@@ -2,20 +2,23 @@ import 'package:calculatorbutcomplex/menu.dart';
 import 'package:flutter/foundation.dart';
 import 'package:math_expressions/math_expressions.dart';
 
+
+
+
 class Calculation with ChangeNotifier {
   String _screen = "", _final = "";
-  Future<void> ezcalculation() async {
+  Future<void> ezcalculation(String opp) async {
     if (_screen != "") {
-      try {
-        Parser p = Parser();
-        Expression exp = p.parse(_screen);
-        ContextModel cm = ContextModel();
-        await db.rawUpdate('UPDATE Calculator SET finalvalue=?',
-            [(exp.evaluate(EvaluationType.REAL, cm)).ceil().toString()]);
-        _final = (await db.rawQuery('SELECT * FROM Calculator'))[0]['finalvalue'];
-      } on RangeError catch (e) {
-        // TODO
-      }
+      Parser p = Parser();
+      Expression exp = p.parse(_screen);
+      ContextModel cm = ContextModel();
+      await db.rawUpdate('UPDATE Calculator SET finalvalue=?', [
+        (exp.evaluate(EvaluationType.REAL, cm)).ceil().toString()
+      ]); //db update
+
+      _final = (await db.rawQuery('SELECT * FROM Calculator'))[0]
+          ['finalvalue']; //db query
+      
     }
   }
 

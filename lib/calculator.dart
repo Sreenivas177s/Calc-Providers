@@ -1,6 +1,22 @@
 import 'package:calculatorbutcomplex/calculation.dart';
+import 'package:calculatorbutcomplex/history.dart';
+import 'package:calculatorbutcomplex/main.dart';
+import 'package:calculatorbutcomplex/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+var prefs;
+List<String> keys = [];
+addStringToSF(String key, String value) async {
+   prefs = await SharedPreferences.getInstance();
+  prefs.setString(key, value);
+}
+
+getStringValuesSF(String key) async {
+   prefs = await SharedPreferences.getInstance();
+  return prefs.getString(key);
+}
 
 class Calculator extends StatelessWidget {
   String box_1 = "";
@@ -27,39 +43,58 @@ class Calculator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Future<void> _dbupload(var cart, String opp) async {
+      await db.rawInsert('INSERT INTO Calculator(eqn,ans,op) VALUES(?,?,?)',
+          [screen.substring(0, screen.length - 2), cart.getValue(), opp]);
+      addStringToSF(screen.substring(0, screen.length - 2), cart.getValue());
+      keys.add(
+        screen.substring(0, screen.length - 2),
+      );
+    }
+
     ElevatedButton oppads(String opp) {
       return ElevatedButton(
-        onPressed: () {
+        onPressed: () async {
           if (num1 == "") num1 = box_1;
           box_1 = "";
-          screen += "$opp";
+          screen += " $opp ";
           op = opp;
           var cart = context.read<Calculation>();
           cart.setScreen(screen);
           if (num2.isNotEmpty) num1 = temp_calc;
+          if (num2 != "") {
+            await _dbupload(cart, opp);
+          }
         },
         child: Text(opp),
       );
     }
 
+    Future<void> _dbfetch() async {
+      if (op1 == '+' || op1 == '-') {
+        a = await db.rawQuery(
+            'SELECT * FROM Calculator WHERE op=? OR op=?', ['+', '-']);
+        Navigator.pushNamed(context, His1tViewRoute);
+      } else {
+        a = await db.rawQuery(
+            'SELECT * FROM Calculator WHERE op=? OR op=?', ['*', '/']);
+        Navigator.pushNamed(context, His2tViewRoute);
+      }
+      ;
+    }
+
     ElevatedButton numberpads(String numm) {
       return ElevatedButton(
         onPressed: () async {
-          var cart = context.read<Calculation>();
-          // if  (screen[0] == "+" ||
-          // screen[0] == "-" ||
-          // screen[0] == "*" ||
-          // screen[0] == "/") {
-          //   screen = "$cart.getValue()" + "$screen";
-          // }
           box_1 += numm;
           screen += numm;
-
+          var cart = context.read<Calculation>();
           print("screen - $screen");
           cart.setScreen(screen);
           if (op != "") {
             num2 = box_1;
-            await cart.ezcalculation();
+
+            await cart.ezcalculation(op);
             cart.setScreen(screen);
           }
         },
@@ -71,6 +106,16 @@ class Calculator extends StatelessWidget {
       appBar: AppBar(
         title: Text("Calculator"),
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+              onPressed: () async {
+                _dbfetch();
+              },
+              icon: Icon(
+                Icons.history,
+                color: Colors.white,
+              ))
+        ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -120,8 +165,12 @@ class Calculator extends StatelessWidget {
                   var cart = context.read<Calculation>();
                   if (screen != "") {
                     screen = screen.substring(0, screen.length - 1);
-                    cart.setScreen(screen);
-                    await cart.ezcalculation();
+                  }
+                  cart.setScreen(screen);
+                  try {
+                    if (screen != "") await cart.ezcalculation(op);
+                  } on Exception catch (e) {
+                    // TODO
                   }
                 },
                 child: Icon(Icons.keyboard_backspace),
@@ -146,7 +195,7 @@ class Calculator extends StatelessWidget {
                     var cart = context.read<Calculation>();
                     screen += cart.getValue();
                     cart.setScreen(screen);
-                    await cart.ezcalculation();
+                    await cart.ezcalculation(op);
                     cart.setScreen(screen);
                   },
                   child: Text("ANS")),

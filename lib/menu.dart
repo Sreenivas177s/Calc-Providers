@@ -1,3 +1,4 @@
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -6,10 +7,7 @@ import 'package:sqflite/sqflite.dart';
 
 import 'main.dart';
 
-var filepath;
-List<dynamic> filelist = [];
-var db;
-
+var db,filepath,filelist=[];
 class Menu extends StatefulWidget {
   const Menu({Key? key}) : super(key: key);
 
@@ -26,21 +24,25 @@ class _MenuState extends State<Menu> {
   }
 
   void _initdb() async {
-    db = await openDatabase('$filepath' + "/basic.db", version: 1,
-        onCreate: (Database db, int version) async {
-      await db.execute('CREATE TABLE Calculator (finalvalue TEXT PRIMARY KEY)');
+    db = await openDatabase('$filepath' + "/calculator.db", version: 2,
+    onOpen: (Database db) async {
+        await db.rawDelete('DELETE FROM Calculator WHERE op = ? OR op = ? OR op = ?OR op =?' , ['+','*','-','/']);
+        await await db.rawUpdate('UPDATE Calculator SET finalvalue=?',["0"]);
+    },
+    onCreate: (Database db, int version) async {
+      await db.execute('CREATE TABLE Calculator (finalvalue TEXT ,eqn TEXT,ans TEXT,op TEXT)');
       int id1 =
           await db.rawInsert('INSERT INTO Calculator(finalvalue) VALUES("0")');
       print('inserted1: $id1');
     });
 
-//     List<Map> list = await db.rawQuery('SELECT * FROM Calculator');
+     List<Map> list = await db.rawQuery('SELECT * FROM Calculator');
 //     print(list[0]['finalvalue']);
 //     int count = await db.rawUpdate(
 //     'UPDATE Calculator SET finalvalue=?',
 //     ["dummy value"]);
 // list = await db.rawQuery('SELECT * FROM Calculator');
-//     print(list[0]['finalvalue']);
+     print(list);
   }
 
   void _listofFiles() async {
@@ -52,7 +54,6 @@ class _MenuState extends State<Menu> {
   @override
   void dispose() {
     db.dispose();
-    print("disposed db succesfully");
     super.dispose();
   }
 
@@ -62,19 +63,15 @@ class _MenuState extends State<Menu> {
       appBar: AppBar(
         title: Text("CALCULATOR SEPARATED"),
         actions: [
-          PopupMenuButton(
-              icon: Icon(Icons.menu),
-              onSelected: (String item) => Navigator.pushNamed(context, item),
-              itemBuilder: (context) => [
-                    PopupMenuItem<String>(
-                      child: Text("CALC 1"),
-                      value: Calc1ViewRoute,
-                    ),
-                    PopupMenuItem<String>(
-                      child: Text("CALC 2"),
-                      value: Calc2ViewRoute,
-                    ),
-                  ]),
+          PopupMenuButton(icon: Icon(Icons.menu)
+            ,onSelected:(String item)=>Navigator.pushNamed(context, item)
+
+            ,itemBuilder: (context)=>[
+            PopupMenuItem<String>(child: Text("CALC 1"),
+            value: Calc1ViewRoute,),
+            PopupMenuItem<String>(child: Text("CALC 2"),
+            value: Calc2ViewRoute,),
+          ]),
         ],
         centerTitle: true,
       ),
@@ -86,9 +83,11 @@ class _MenuState extends State<Menu> {
               "CALCULATOR",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
             ),
-            Text(
-              "TO PERFORM\nADDITION , SUBTRACTION ,\nMULTIPLICATION , DIVISION and soo on",
-              style: TextStyle(fontSize: 20),
+            Center(
+              child: Text(
+                "TO PERFORM\nADDITION , SUBTRACTION ,\nMULTIPLICATION , DIVISION ",
+                style: TextStyle(fontSize: 20),
+              ),
             ),
           ],
         ),
